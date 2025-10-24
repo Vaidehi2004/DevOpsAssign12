@@ -1,0 +1,56 @@
+- hosts: all
+  become: yes
+  tasks:
+    - name: update apt and install packages
+      apt:
+        update_cache: yes
+        name:
+          - apt-transport-https
+          - ca-certificates
+          - curl
+          - gnupg-agent
+          - software-properties-common
+        state: present
+
+    - name: add docker gpg key
+      apt_key:
+        url: https://download.docker.com/linux/ubuntu/gpg
+        state: present
+
+    - name: add docker repo
+      apt_repository:
+        repo: deb [arch=amd64] https://download.docker.com/linux/ubuntu focal stable
+        state: present
+
+    - name: install docker & docker-compose plugin
+      apt:
+        name:
+          - docker-ce
+          - docker-ce-cli
+          - containerd.io
+        state: latest
+        update_cache: yes
+
+    - name: Ensure docker group exists
+      group:
+        name: docker
+        state: present
+
+    - name: Add ubuntu user to docker group
+      user:
+        name: "{{ ansible_user | default('ubuntu') }}"
+        groups: docker
+        append: yes
+
+    - name: install python docker SDK pip (for community.general modules)
+      apt:
+        name: python3-pip
+        state: present
+
+    - name: install docker-compose plugin (cli)
+      shell: |
+        mkdir -p /usr/local/lib/docker/cli-plugins
+        curl -SL "https://github.com/docker/compose/releases/download/v2.15.1/docker-compose-linux-x86_64" -o /usr/local/lib/docker/cli-plugins/docker-compose
+        chmod +x /usr/local/lib/docker/cli-plugins/docker-compose
+      args:
+        creates: /usr/local/lib/docker/cli-plugins/docker-compose

@@ -1,0 +1,13 @@
+<!doctype html>
+<html>
+  <body>
+    <h2>Login</h2>
+    {% if error %}<p style="color:red">{{ error }}</p>{% endif %}
+    <form method="post">{% csrf_token %}
+      <label>Roll No: <input name="username" /></label><br/>
+      <label>Admission No: <input type="password" name="password" /></label><br/>
+      <button type="submit">Login</button>
+    </form>
+    <p><a href="/register/">Register</a></p>
+  </body>
+</html>
